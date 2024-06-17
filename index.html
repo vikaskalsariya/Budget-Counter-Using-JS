@@ -1,0 +1,201 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+</head>
+
+<body>
+    <main>
+        <section>
+            <div class="bgImg w-1">
+                <div class="container h-100">
+                    <div class="imgBody d-flex justify-content-center align-item-center flex-column">
+                        <p class="topText">Available Budget in September 2023</p>
+                        <h1 id="totalBudget">0 ₹</h1>
+                        <div class="totalIncome d-flex justify-space-between">
+                            <p>Income</p>
+                            <span id="totalIncome">0 ₹</span>
+                        </div>
+                        <div class="totalExpenses d-flex justify-space-between">
+                            <p>Expenses</p>
+                            <span id="totalExpenses">0 ₹</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="middelLine d-flex justify-content-center">
+                <select id="type">
+                    <option>-- Select type --</option>
+                    <option value="income">Income</option>
+                    <option value="expenses">Expenses</option>
+                </select>
+                <input type="text" placeholder="Add description" id="descri" class="w-3">
+                <input type="text" placeholder="Price" id="price">
+                <button id="add" onclick="addDataButton()">Add</button>
+            </div>
+            <div class="footer">
+                <div class="container h-100">
+                    <div class="d-flex justify-content-center justify-space-between align-item-center h-100">
+                        <div class="w-2">
+                            <h2 class="inco">INCOME</h2>
+                            <div class="list" id="listIncome">
+                                <!-- code in java script file  -->
+                            </div>
+                        </div>
+
+                        <div class="w-2">
+                            <h2 class="expe">EXPENSES</h2>
+                            <div class="list" id="listExpenses">
+                                <!-- code in java script file -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+<script>
+    //------------- variable declaration -------------------
+    var type = document.getElementById('type');
+    var descri = document.getElementById('descri');
+    var price = document.getElementById('price');
+    var totalIncome = document.getElementById('totalIncome');
+    var incomeValue = [];
+    var expensesValue = [];
+    var budgetValue = 0;
+    var totalBudget = document.getElementById('totalBudget');
+    var incomeset = JSON.stringify(incomeValue)
+    localStorage.setItem('Income', incomeset);
+    var expensesset = JSON.stringify(expensesValue)
+    localStorage.setItem('expenses', expensesset);
+    var budgetset = JSON.stringify(budgetValue)
+    localStorage.setItem('budget', budgetset);
+    var chek = true;
+    // ---------------------add button ---------------------------
+    function addDataButton() {
+        if(type.value == '-- Select type --')
+        {
+            alert("Select type")
+        }
+        else if (type.value == 'income') {
+            income();
+        }
+        else {
+            expenses();
+        }
+        descri.value = '';
+        price.value = '';
+        type.value = '-- Select type --';
+    }
+    // -----------------------Income -----------------------------
+    function income() {
+
+        var localstorageIncome = JSON.parse(localStorage.getItem('Income'))
+        var localstoragebudget = JSON.parse(localStorage.getItem('budget'))
+        if (localstorageIncome.length == 0) {
+            incomeValue = [
+                {
+                    'description': descri.value,
+                    'price': parseInt(price.value),
+                    'totalIncome': parseInt(price.value)
+                }
+            ];
+            localstoragebudget = parseInt(price.value);
+        }
+        else {
+            var obj =
+            {
+                'description': descri.value,
+                'price': parseInt(price.value),
+                'totalIncome': parseInt(price.value) + localstorageIncome[localstorageIncome.length - 1].totalIncome,
+            }
+            incomeValue.push(obj)
+            localstoragebudget += parseInt(price.value);
+        }
+        var data = JSON.stringify(incomeValue)
+        localStorage.setItem('Income', data);
+        var budgetdata = JSON.stringify(localstoragebudget)
+        localStorage.setItem('budget', budgetdata);
+        incomeViewData()
+    }
+    // ---------------------- Expenses----------------------------
+    function expenses()
+    {
+        var localstorageexpenses = JSON.parse(localStorage.getItem('expenses'));
+            var localstoragebudget = JSON.parse(localStorage.getItem('budget'));
+            var obj = {};
+            if (localstoragebudget < price.value ){
+                alert("Don't have budget")
+            }
+            else {
+                if (localstorageexpenses.length == 0) {
+                    obj =
+                    {
+                        'description': descri.value,
+                        'price': parseInt(price.value),
+                        'totalexpenses': parseInt(price.value),
+                    }
+                }
+                else
+                {
+                    obj =
+                    {
+                        'description': descri.value,
+                        'price': parseInt(price.value),
+                        'totalexpenses': parseInt(price.value) + localstorageexpenses[localstorageexpenses.length - 1].totalexpenses,
+                    };
+                }
+                localstoragebudget -= parseInt(price.value);
+                expensesValue.push(obj)
+                var databudget = JSON.stringify(localstoragebudget)
+                localStorage.setItem('budget', databudget);
+            }
+            var data = JSON.stringify(expensesValue)
+            localStorage.setItem('expenses', data);
+            expensesViewData()
+    }
+    // --------------------income viwe Data ----------------------
+    function incomeViewData() {
+        var listData = '';
+        var localstorageIncome = JSON.parse(localStorage.getItem('Income'));
+        localstorageIncome.map((v) => {
+            listData += ` <div class="textBox d-flex w-1 justify-space-between">`
+            listData += `                         <span>${v.description}</span>`
+            listData += `                         <span id="officeMoney">${v.price}</span>`
+            listData += `                     </div>`
+            document.getElementById('totalIncome').innerHTML = v.totalIncome +" ₹";
+        })
+        var listIncome = document.getElementById('listIncome').innerHTML = listData;
+        totalBudget.innerHTML = JSON.parse(localStorage.getItem('budget'))+" ₹";
+        totalBudget.style.color = "rgb(0, 255, 0)";
+        setTimeout(()=>{
+            totalBudget.style.color = 'white'
+        },1000)
+    }
+    // --------------------expenses viwe Data --------------------
+    function expensesViewData() {
+        var listData = '';
+        var localstorageexpenses = JSON.parse(localStorage.getItem('expenses'));
+        localstorageexpenses.map((v) => {
+            listData += ` <div class="textBox d-flex w-1 justify-space-between">`
+            listData += `                         <span>${v.description}</span>`
+            listData += `                         <span id="expensexPrice">${v.price}</span>`
+            listData += `                     </div>`
+            document.getElementById('totalExpenses').innerHTML = v.totalexpenses+" ₹";
+        })
+        var listExpenses = document.getElementById('listExpenses').innerHTML = listData;
+        totalBudget.innerHTML = JSON.parse(localStorage.getItem('budget'))+" ₹";
+        totalBudget.style.color = "red";
+        setTimeout(()=>{
+            totalBudget.style.color = 'white'
+        },1000)
+    }
+</script>
+
+</html>
